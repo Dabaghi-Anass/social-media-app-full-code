@@ -101,6 +101,19 @@ async function addFriendRequest(req, res) {
     res.send(err.message).status(400);
   }
 }
+
+async function cancelFriendRequest(req, res) {
+  try {
+    const user = await User.findOne({ _id: req.params.id });
+    if (!user) return res.send("user not found");
+    user.friendRequests.pop(req.params.friend_id);
+    await user.save();
+    res.status(200).send(user);
+  } catch (err) {
+    res.send(err.message).status(400);
+  }
+}
+
 async function deleteFriend(req, res) {
   try {
     const user = await User.findOne({ _id: req.params.id });
@@ -120,5 +133,6 @@ module.exports = {
   addFriend,
   deleteFriend,
   addFriendRequest,
+  cancelFriendRequest,
   getUser,
 };
