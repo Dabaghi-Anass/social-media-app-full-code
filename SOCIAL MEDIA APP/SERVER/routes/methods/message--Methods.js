@@ -8,12 +8,21 @@ async function getMessages(req, res, query) {
     res.send(err).status(404);
   }
 }
+async function getMessage(req, res) {
+  try {
+    const message = await Message.findOne({_id : req.params.id});
+    res.json(message);
+  } catch (err) {
+    res.send(err).status(404);
+  }
+}
+
 async function sendMessage(req, res) {
   try {
     const message = new Message(
-      _.pick(req.body, ["content", "sender", "receiver", "sendedAt"])
+      _.pick(req.body, ["content", "sender", "receiver", "isliked", "sendedAt"])
     );
-    message.save();
+    await message.save();
     res.json(message);
   } catch (err) {
     res.send(err).status(404);
@@ -23,7 +32,7 @@ async function likeMessage(req, res) {
   try {
     const message = await Message.findOne({ _id: req.params.id });
     if (!message) return;
-    message.isLiked = !message.isLiked;
+    message.isliked = !message.isliked;
     await message.save();
     res.json(message);
   } catch (err) {
@@ -44,4 +53,5 @@ module.exports = {
   sendMessage,
   likeMessage,
   deleteMessage,
+  getMessage
 };

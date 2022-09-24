@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
+const asyncHandler = require("express-async-handler");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const socketio = require("socket.io");
@@ -25,22 +26,30 @@ app.use("/api/users", usersRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/auth", auth);
 const PORT = process.env.PORT || 5000;
-
+asyncHandler(app);
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname + "/PUBLIC/index.html"));
 });
 io.on("connection", (socket) => {
-  socket.on("message", (message) => console.log(message));
-  socket.emit("message", {
-    content: "kidayr labas 3lik",
-    isLiked: false,
-    _id: "123",
+  socket.on("login", (user) => {
+    if (user !== {}) {
+      socket.broadcast.emit("user-online", user);
+    }
   });
-  socket.emit("message", {
-    content: "afin lhmdlh",
-    isLiked: true,
-    _id: "aa",
-    sender: "user",
+  socket.on("join-chat", (data) => {
+    socket.join(data);
+  });
+  socket.on("message", (message) => {
+    const { sender, receiver } = message;
+    socket.to(`${receiver}&${sender}`).emit("message", message);
+  });
+  socket.on("delete-message", (message) => {
+    const { sender, receiver } = message;
+    socket.to(`${receiver}&${sender}`).emit("message-deleted", message._id);
+  });
+  socket.on("like-message", (message) => {
+    const { sender, receiver } = message;
+    socket.to(`${receiver}&${sender}`).emit("message-liked", message);
   });
 });
 server.listen(PORT, console.log(`info : app listening on port ${PORT}...`));

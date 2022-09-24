@@ -1,4 +1,9 @@
 const mongoose = require("mongoose");
+const date = new Date();
+const time = {
+  h: date.getHours(),
+  m: date.getMinutes(),
+};
 const messageSchema = mongoose.Schema({
   content: {
     type: String,
@@ -14,10 +19,8 @@ const messageSchema = mongoose.Schema({
   },
   sendedAt: {
     type: String,
-    required: true,
-    default: Date.now(),
   },
-  isLiked: Boolean,
+  isliked: Boolean,
 });
 
 const Message = mongoose.model("Message", messageSchema);
